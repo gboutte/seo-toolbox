@@ -3,5 +3,142 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
+    "seo-toolbox": {
+      "projectType": "library",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/seo-toolbox",
+      "sourceRoot": "projects/seo-toolbox/src",
+      "prefix": "seo",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:ng-packagr",
+          "options": {
+            "project": "projects/seo-toolbox/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "projects/seo-toolbox/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "projects/seo-toolbox/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "tsConfig": "projects/seo-toolbox/tsconfig.spec.json",
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ]
+          }
+        }
+      }
+    },
+    "doc": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/doc",
+      "sourceRoot": "projects/doc/src",
+      "prefix": "doc",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:application",
+          "options": {
+            "outputPath": "dist/doc",
+            "index": "projects/doc/src/index.html",
+            "browser": "projects/doc/src/main.ts",
+            "polyfills": [
+              "zone.js"
+            ],
+            "tsConfig": "projects/doc/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/doc/src/favicon.ico",
+              "projects/doc/src/assets"
+            ],
+            "styles": [
+              "projects/doc/src/styles.scss"
+            ],
+            "scripts": [],
+            "server": "projects/doc/src/main.server.ts",
+            "prerender": true,
+            "ssr": {
+              "entry": "projects/doc/server.ts"
+            }
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "buildTarget": "doc:build:production"
+            },
+            "development": {
+              "buildTarget": "doc:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "buildTarget": "doc:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "projects/doc/tsconfig.spec.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "projects/doc/src/favicon.ico",
+              "projects/doc/src/assets"
+            ],
+            "styles": [
+              "projects/doc/src/styles.scss"
+            ],
+            "scripts": []
+          }
+        }
+      }
+    }
   }
 }
