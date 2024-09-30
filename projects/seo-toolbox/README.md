@@ -1,24 +1,49 @@
 # SeoToolbox
 
-This library was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.0.
 
-## Code scaffolding
+## SSR
+To configure the SSR, you need to add the url domain inside the `server.ts` file.
 
-Run `ng generate component component-name --project seo-toolbox` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module --project seo-toolbox`.
-> Note: Don't forget to add `--project seo-toolbox` or else it will be added to the default project in your `angular.json` file. 
+```typescript
+ // All regular routes use the Angular engine
+  server.get('*', (req, res, next) => {
+    const { protocol, originalUrl, baseUrl, headers } = req;
 
-## Build
+    commonEngine
+      .render({
+        bootstrap,
+        documentFilePath: indexHtml,
+        url: `${protocol}://${headers.host}${originalUrl}`,
+        publicPath: browserDistFolder,
+        providers: [
+          { provide: APP_BASE_HREF, useValue: baseUrl },
+          { provide: BASE_URL_DOMAIN, useValue: `${protocol}://${headers.host}` }, // <--- Add this line
+        ],
+      })
+      .then((html) => res.send(html))
+      .catch((err) => next(err));
+  });
 
-Run `ng build seo-toolbox` to build the project. The build artifacts will be stored in the `dist/` directory.
+```
 
-## Publishing
 
-After building your library with `ng build seo-toolbox`, go to the dist folder `cd dist/seo-toolbox` and run `npm publish`.
+## Usage
 
-## Running unit tests
+```typescript
+interface PageSeoConfig {
+  title?: string | undefined;
+  description?: string | undefined;
+  image?: string | undefined;
+  slug?: string | undefined;
+  keywords?: string | undefined;
+  tags:{
+    twitter?:boolean,
+    openGraph?:boolean,
+    canonical?:boolean
+  }
+}
+```
 
-Run `ng test seo-toolbox` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+```
+generateTags(config: PageSeoConfig)
+```
