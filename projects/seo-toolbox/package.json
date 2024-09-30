@@ -1,5 +1,5 @@
 {
-  "name": "seo-toolbox",
+  "name": "@gboutte/seo-toolbox",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/common": "^17.3.0",
