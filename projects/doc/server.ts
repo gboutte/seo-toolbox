@@ -4,6 +4,7 @@ import express from 'express';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import bootstrap from './src/main.server';
+import {BASE_URL_DOMAIN} from "../seo-toolbox/src/lib/domain.token";
 
 // The Express app is exported so that it can be used by serverless Functions.
 export function app(): express.Express {
@@ -37,7 +38,10 @@ export function app(): express.Express {
         documentFilePath: indexHtml,
         url: `${protocol}://${headers.host}${originalUrl}`,
         publicPath: browserDistFolder,
-        providers: [{ provide: APP_BASE_HREF, useValue: baseUrl }],
+        providers: [
+          { provide: APP_BASE_HREF, useValue: baseUrl },
+          { provide: BASE_URL_DOMAIN, useValue: `${protocol}://${headers.host}` },
+        ],
       })
       .then((html) => res.send(html))
       .catch((err) => next(err));
