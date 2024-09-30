@@ -40,7 +40,13 @@ export class SeoTagsService {
       this.deleteMetaTag('og:description');
     }
     if (config.image) {
-      this.setMetaTag('og:image', `${this.domain}${config.image}`);
+      let urlImage:string;
+      if(config.image.startsWith('http')) {
+        urlImage = config.image;
+      }else{
+        urlImage = `${this.domain}${config.image}`;
+      }
+      this.setMetaTag('og:image', urlImage);
     } else {
       this.deleteMetaTag('og:image');
     }
@@ -139,7 +145,13 @@ export class SeoTagsService {
       this.deleteMetaTag('twitter:description');
     }
     if (config.image) {
-      this.setMetaTag('twitter:image', `${this.domain}${config.image}`);
+      let urlImage:string;
+      if(config.image.startsWith('http')) {
+        urlImage = config.image;
+      }else{
+        urlImage = `${this.domain}${config.image}`;
+      }
+      this.setMetaTag('twitter:image', urlImage);
     } else {
       this.deleteMetaTag('twitter:image');
     }
