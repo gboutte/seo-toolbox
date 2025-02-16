@@ -1,10 +1,16 @@
-import {Inject, Injectable, Optional, PLATFORM_ID} from '@angular/core';
-import {Meta, Title} from "@angular/platform-browser";
-import {DOCUMENT, isPlatformServer} from "@angular/common";
-import {BASE_URL_DOMAIN} from "./domain.token";
+import { DOCUMENT, isPlatformServer } from '@angular/common';
+import {
+  Inject,
+  Injectable,
+  Optional,
+  PLATFORM_ID,
+  REQUEST,
+} from '@angular/core';
+import { Meta, Title } from '@angular/platform-browser';
+import { BASE_URL_DOMAIN } from './domain.token';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SeoTagsService {
   private metaService: Meta;
@@ -16,19 +22,24 @@ export class SeoTagsService {
     titleService: Title,
     @Inject(DOCUMENT) private document: any,
     @Inject(PLATFORM_ID) private platformId: any,
+    @Optional() @Inject(REQUEST) request: Request | null,
     @Optional() @Inject(BASE_URL_DOMAIN) private base_url: string,
   ) {
     this.metaService = metaService;
     this.titleService = titleService;
 
     if (isPlatformServer(this.platformId) && this.base_url) {
-      this.domain = base_url;
+      this.domain = 'base_url';
+    } else if (request) {
+      const host = request.headers.get('host') ?? '';
+      const url = request.url;
+      const protocol = url.startsWith('https') ? 'https' : 'http';
+
+      this.domain = `${protocol}://${host}`;
     } else {
       this.domain = this.document.location.origin;
     }
   }
-
-
 
   public setOpenGraph(config: PageSeoConfig) {
     if (config.title) {
@@ -40,10 +51,10 @@ export class SeoTagsService {
       this.deleteMetaTag('og:description');
     }
     if (config.image) {
-      let urlImage:string;
-      if(config.image.startsWith('http')) {
+      let urlImage: string;
+      if (config.image.startsWith('http')) {
         urlImage = config.image;
-      }else{
+      } else {
         urlImage = `${this.domain}${config.image}`;
       }
       this.setMetaTag('og:image', urlImage);
@@ -83,16 +94,15 @@ export class SeoTagsService {
   }
 
   public generateTags(config: PageSeoConfig) {
-
-    if(!config.tags) {
+    if (!config.tags) {
       config.tags = {
         twitter: true,
         openGraph: true,
-        canonical: true
-      }
+        canonical: true,
+      };
     }
 
-    if(config.slug && config.slug[0] !== '/') {
+    if (config.slug && config.slug[0] !== '/') {
       config.slug = '/' + config.slug;
     }
 
@@ -100,14 +110,14 @@ export class SeoTagsService {
       this.titleService.setTitle(config.title);
     }
     this.setMetaTags(config);
-    if(config.tags.twitter !== false) {
+    if (config.tags.twitter !== false) {
       this.setTwitterCard(config);
     }
 
-    if(config.tags.openGraph !== false) {
+    if (config.tags.openGraph !== false) {
       this.setOpenGraph(config);
     }
-    if(config.tags.canonical !== false) {
+    if (config.tags.canonical !== false) {
       this.setCanonical(config.slug);
     }
   }
@@ -145,10 +155,10 @@ export class SeoTagsService {
       this.deleteMetaTag('twitter:description');
     }
     if (config.image) {
-      let urlImage:string;
-      if(config.image.startsWith('http')) {
+      let urlImage: string;
+      if (config.image.startsWith('http')) {
         urlImage = config.image;
-      }else{
+      } else {
         urlImage = `${this.domain}${config.image}`;
       }
       this.setMetaTag('twitter:image', urlImage);
@@ -158,16 +168,17 @@ export class SeoTagsService {
   }
 }
 
-
 export interface PageSeoConfig {
   title?: string | undefined;
   description?: string | undefined;
   image?: string | undefined;
   slug?: string | undefined;
   keywords?: string | undefined;
-  tags?:{
-    twitter?:boolean| undefined,
-    openGraph?:boolean| undefined,
-    canonical?:boolean| undefined
-  }|undefined;
+  tags?:
+    | {
+        twitter?: boolean | undefined;
+        openGraph?: boolean | undefined;
+        canonical?: boolean | undefined;
+      }
+    | undefined;
 }

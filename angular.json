@@ -72,7 +72,8 @@
             ],
             "scripts": [],
             "server": "projects/doc/src/main.server.ts",
-            "prerender": true,
+            "prerender": false,
+            "outputMode": "server",
             "ssr": {
               "entry": "projects/doc/server.ts"
             }
