@@ -1,7 +1,7 @@
 # SeoToolbox
 
 
-## SSR
+## SSR Angular < 19
 To configure the SSR, you need to add the url domain inside the `server.ts` file.
 
 ```typescript
