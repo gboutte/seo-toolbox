@@ -166,6 +166,36 @@ export class SeoTagsService {
       this.deleteMetaTag('twitter:image');
     }
   }
+
+  public resetTags() {
+    this.resetOpenGraph();
+    this.resetTwitterCard();
+    this.resetMetaTags();
+    this.resetCanonical();
+  }
+
+  public resetOpenGraph() {
+    this.deleteMetaTag('og:title');
+    this.deleteMetaTag('og:description');
+    this.deleteMetaTag('og:image');
+    this.deleteMetaTag('og:url');
+  }
+
+  public resetTwitterCard() {
+    this.deleteMetaTag('twitter:card');
+    this.deleteMetaTag('twitter:title');
+    this.deleteMetaTag('twitter:description');
+    this.deleteMetaTag('twitter:image');
+  }
+
+  public resetMetaTags() {
+    this.deleteMetaTag('description');
+    this.deleteMetaTag('keywords');
+  }
+
+  public resetCanonical() {
+    this.setCanonical(null);
+  }
 }
 
 export interface PageSeoConfig {
