@@ -20,8 +20,8 @@ export class SeoTagsService {
   constructor(
     metaService: Meta,
     titleService: Title,
-    @Inject(DOCUMENT) private document: any,
-    @Inject(PLATFORM_ID) private platformId: any,
+    @Inject(DOCUMENT) private document: Document,
+    @Inject(PLATFORM_ID) private platformId: object,
     @Optional() @Inject(REQUEST) request: Request | null,
     @Optional() @Inject(BASE_URL_DOMAIN) private base_url: string,
   ) {
@@ -86,6 +86,37 @@ export class SeoTagsService {
       }
     }
   }
+
+
+
+  public setAlternates(alts:PageSeoAlternateConfig[]|null){
+
+    const head = this.document.getElementsByTagName('head')[0];
+    var elements =
+      this.document.querySelectorAll("link[rel='alternate']");
+
+    //Remove all the alternate
+    if(elements !== null) {
+      for(const element of elements) {
+        head.removeChild(element);
+      }
+    }
+
+    if(alts !== null) {
+
+      for (const alt of alts) {
+
+        const newAlternate = this.document.createElement('link')
+        head.appendChild(newAlternate);
+
+
+        newAlternate.setAttribute('rel', 'alternate');
+        newAlternate.setAttribute('href', `${this.domain}${alt.url}`);
+        newAlternate.setAttribute('hreflang', `${alt.lang}`);
+      }
+    }
+  }
+
   public setMetaTag(tag: string, value: string) {
     if (this.metaService.getTag(`name='${tag}'`) != null) {
       this.metaService.removeTag(`name='${tag}'`);
@@ -119,6 +150,11 @@ export class SeoTagsService {
     }
     if (config.tags.canonical !== false) {
       this.setCanonical(config.slug);
+    }
+    if(config.alternates){
+      this.setAlternates(config.alternates)
+    }else{
+      this.setAlternates(null);
     }
   }
 
@@ -205,10 +241,20 @@ export interface PageSeoConfig {
   slug?: string | undefined;
   keywords?: string | undefined;
   tags?:
-    | {
-        twitter?: boolean | undefined;
-        openGraph?: boolean | undefined;
-        canonical?: boolean | undefined;
-      }
+    | PageSeoTagsConfig
     | undefined;
+  alternates?:PageSeoAlternateConfig[] | undefined;
+}
+
+
+
+export interface PageSeoTagsConfig {
+  twitter?: boolean | undefined;
+  openGraph?: boolean | undefined;
+  canonical?: boolean | undefined;
+}
+
+export interface PageSeoAlternateConfig {
+  lang: string;
+  url: string;
 }
