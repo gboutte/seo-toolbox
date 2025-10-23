@@ -14,16 +14,23 @@ export class Page1Component {
       description: 'Page 1 Description',
       slug: 'page1',
       keywords: 'page 1, angular, seo, example',
-      alternates:[
+      alternates: [
         {
-          lang:'en',
-          url:'/page1?lang=en',
+          lang: 'en',
+          url: '/page1?lang=en',
         },
         {
-          lang:'fr',
-          url:'/page1?lang=fr',
-        }
-      ]
+          lang: 'fr',
+          url: '/page1?lang=fr',
+        },
+      ],
     });
+
+    seoTagsService.generateTags(
+      {
+        image: `/images/application/page1-image.png`,
+      },
+      true,
+    );
   }
 }

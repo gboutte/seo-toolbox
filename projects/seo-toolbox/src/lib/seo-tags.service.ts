@@ -16,6 +16,7 @@ export class SeoTagsService {
   private metaService: Meta;
   private titleService: Title;
   private domain: string;
+  private request: Request | null;
 
   constructor(
     metaService: Meta,
@@ -27,27 +28,36 @@ export class SeoTagsService {
   ) {
     this.metaService = metaService;
     this.titleService = titleService;
+    this.request = request;
 
-    if (isPlatformServer(this.platformId) && this.base_url) {
-      this.domain = 'base_url';
-    } else if (request) {
-      const host = request.headers.get('host') ?? '';
-      const url = request.url;
-      const protocol = url.startsWith('https') ? 'https' : 'http';
-
-      this.domain = `${protocol}://${host}`;
-    } else {
-      this.domain = this.document.location.origin;
-    }
+    this.domain = this.getCurrentDomain();
   }
 
-  public setOpenGraph(config: PageSeoConfig) {
+  public getCurrentDomain(): string {
+    let domain: string;
+    if (isPlatformServer(this.platformId) && this.base_url) {
+      domain = this.base_url;
+    } else if (this.request) {
+      const host = this.request.headers.get('host') ?? '';
+      const url = this.request.url;
+      const protocol = url.startsWith('https') ? 'https' : 'http';
+
+      domain = `${protocol}://${host}`;
+    } else {
+      domain = this.document.location.origin;
+    }
+    return domain;
+  }
+
+  public setOpenGraph(config: PageSeoConfig, patchMode: boolean = false) {
     if (config.title) {
       this.setMetaTag('og:title', config.title);
+    } else if (!patchMode) {
+      this.deleteMetaTag('og:title');
     }
     if (config.description) {
       this.setMetaTag('og:description', config.description);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('og:description');
     }
     if (config.image) {
@@ -58,12 +68,12 @@ export class SeoTagsService {
         urlImage = `${this.domain}${config.image}`;
       }
       this.setMetaTag('og:image', urlImage);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('og:image');
     }
     if (config.slug) {
       this.setMetaTag('og:url', `${this.domain}${config.slug}`);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('og:url');
     }
   }
@@ -87,28 +97,21 @@ export class SeoTagsService {
     }
   }
 
-
-
-  public setAlternates(alts:PageSeoAlternateConfig[]|null){
-
+  public setAlternates(alts: PageSeoAlternateConfig[] | null) {
     const head = this.document.getElementsByTagName('head')[0];
-    var elements =
-      this.document.querySelectorAll("link[rel='alternate']");
+    var elements = this.document.querySelectorAll("link[rel='alternate']");
 
     //Remove all the alternate
-    if(elements !== null) {
-      for(const element of elements) {
+    if (elements !== null) {
+      for (const element of elements) {
         head.removeChild(element);
       }
     }
 
-    if(alts !== null) {
-
+    if (alts !== null) {
       for (const alt of alts) {
-
-        const newAlternate = this.document.createElement('link')
+        const newAlternate = this.document.createElement('link');
         head.appendChild(newAlternate);
-
 
         newAlternate.setAttribute('rel', 'alternate');
         newAlternate.setAttribute('href', `${this.domain}${alt.url}`);
@@ -124,7 +127,7 @@ export class SeoTagsService {
     this.metaService.updateTag({ name: tag, content: value });
   }
 
-  public generateTags(config: PageSeoConfig) {
+  public generateTags(config: PageSeoConfig, patchMode: boolean = false) {
     if (!config.tags) {
       config.tags = {
         twitter: true,
@@ -139,10 +142,13 @@ export class SeoTagsService {
 
     if (config.title) {
       this.titleService.setTitle(config.title);
+    } else if (!patchMode) {
+      //Remove title tag
+      this.titleService.setTitle('');
     }
-    this.setMetaTags(config);
+    this.setMetaTags(config, patchMode);
     if (config.tags.twitter !== false) {
-      this.setTwitterCard(config);
+      this.setTwitterCard(config, patchMode);
     }
 
     if (config.tags.openGraph !== false) {
@@ -150,25 +156,27 @@ export class SeoTagsService {
     }
     if (config.tags.canonical !== false) {
       this.setCanonical(config.slug);
+    } else if (!patchMode) {
+      this.setCanonical(null);
     }
-    if(config.alternates){
-      this.setAlternates(config.alternates)
-    }else{
+    if (config.alternates) {
+      this.setAlternates(config.alternates);
+    } else if (!patchMode) {
       this.setAlternates(null);
     }
   }
 
-  setMetaTags(config: PageSeoConfig) {
+  setMetaTags(config: PageSeoConfig, patchMode: boolean = false) {
     const description = config.description;
 
     if (description) {
       this.setMetaTag('description', description);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('description');
     }
     if (config.keywords) {
       this.setMetaTag('keywords', config.keywords);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('keywords');
     }
   }
@@ -180,14 +188,16 @@ export class SeoTagsService {
     }
   }
 
-  public setTwitterCard(config: PageSeoConfig) {
+  public setTwitterCard(config: PageSeoConfig, patchMode: boolean = false) {
     this.setMetaTag('twitter:card', 'summary');
     if (config.title) {
       this.setMetaTag('twitter:title', config.title);
+    } else if (!patchMode) {
+      this.deleteMetaTag('twitter:title');
     }
     if (config.description) {
       this.setMetaTag('twitter:description', config.description);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('twitter:description');
     }
     if (config.image) {
@@ -198,7 +208,7 @@ export class SeoTagsService {
         urlImage = `${this.domain}${config.image}`;
       }
       this.setMetaTag('twitter:image', urlImage);
-    } else {
+    } else if (!patchMode) {
       this.deleteMetaTag('twitter:image');
     }
   }
@@ -240,13 +250,9 @@ export interface PageSeoConfig {
   image?: string | undefined;
   slug?: string | undefined;
   keywords?: string | undefined;
-  tags?:
-    | PageSeoTagsConfig
-    | undefined;
-  alternates?:PageSeoAlternateConfig[] | undefined;
+  tags?: PageSeoTagsConfig | undefined;
+  alternates?: PageSeoAlternateConfig[] | undefined;
 }
-
-
 
 export interface PageSeoTagsConfig {
   twitter?: boolean | undefined;
