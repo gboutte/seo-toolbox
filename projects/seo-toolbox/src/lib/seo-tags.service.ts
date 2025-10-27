@@ -154,7 +154,7 @@ export class SeoTagsService {
     if (config.tags.openGraph !== false) {
       this.setOpenGraph(config);
     }
-    if (config.tags.canonical !== false) {
+    if (config.tags.canonical !== false && config.slug !== undefined) {
       this.setCanonical(config.slug);
     } else if (!patchMode) {
       this.setCanonical(null);
