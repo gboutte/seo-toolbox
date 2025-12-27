@@ -1,10 +1,11 @@
-import { DOCUMENT, isPlatformServer } from '@angular/common';
+import { isPlatformServer } from '@angular/common';
 import {
   Inject,
   Injectable,
   Optional,
   PLATFORM_ID,
   REQUEST,
+  DOCUMENT
 } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { BASE_URL_DOMAIN } from './domain.token';
