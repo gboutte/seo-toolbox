@@ -1,11 +1,10 @@
 import { isPlatformServer } from '@angular/common';
 import {
-  Inject,
+  DOCUMENT,
+  inject,
   Injectable,
-  Optional,
   PLATFORM_ID,
   REQUEST,
-  DOCUMENT
 } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { BASE_URL_DOMAIN } from './domain.token';
@@ -14,23 +13,18 @@ import { BASE_URL_DOMAIN } from './domain.token';
   providedIn: 'root',
 })
 export class SeoTagsService {
-  private metaService: Meta;
-  private titleService: Title;
+  private metaService: Meta = inject(Meta);
+  private titleService: Title = inject(Title);
   private domain: string;
-  private request: Request | null;
-
-  constructor(
-    metaService: Meta,
-    titleService: Title,
-    @Inject(DOCUMENT) private document: Document,
-    @Inject(PLATFORM_ID) private platformId: object,
-    @Optional() @Inject(REQUEST) request: Request | null,
-    @Optional() @Inject(BASE_URL_DOMAIN) private base_url: string,
-  ) {
-    this.metaService = metaService;
-    this.titleService = titleService;
-    this.request = request;
-
+  private document: Document = inject(DOCUMENT);
+  private platformId: object = inject(PLATFORM_ID);
+  private request: Request | null = inject<Request | null>(REQUEST, {
+    optional: true,
+  });
+  private base_url: string | null = inject<string | null>(BASE_URL_DOMAIN, {
+    optional: true,
+  });
+  constructor() {
     this.domain = this.getCurrentDomain();
   }
 
@@ -39,9 +33,9 @@ export class SeoTagsService {
     if (isPlatformServer(this.platformId) && this.base_url) {
       domain = this.base_url;
     } else if (this.request) {
-      const host = this.request.headers.get('host') ?? '';
-      const url = this.request.url;
-      const protocol = url.startsWith('https') ? 'https' : 'http';
+      const host: string = this.request.headers.get('host') ?? '';
+      const url: string = this.request.url;
+      const protocol: string = url.startsWith('https') ? 'https' : 'http';
 
       domain = `${protocol}://${host}`;
     } else {
@@ -50,7 +44,7 @@ export class SeoTagsService {
     return domain;
   }
 
-  public setOpenGraph(config: PageSeoConfig, patchMode: boolean = false) {
+  public setOpenGraph(config: PageSeoConfig, patchMode: boolean = false): void {
     if (config.title) {
       this.setMetaTag('og:title', config.title);
     } else if (!patchMode) {
@@ -79,8 +73,8 @@ export class SeoTagsService {
     }
   }
 
-  public setCanonical(url: string | null | undefined) {
-    const head = this.document.getElementsByTagName('head')[0];
+  public setCanonical(url: string | null | undefined): void {
+    const head: HTMLHeadElement = this.document.getElementsByTagName('head')[0];
     var element: HTMLLinkElement | null =
       this.document.querySelector("link[rel='canonical']") || null;
 
@@ -98,9 +92,11 @@ export class SeoTagsService {
     }
   }
 
-  public setAlternates(alts: PageSeoAlternateConfig[] | null) {
-    const head = this.document.getElementsByTagName('head')[0];
-    var elements = this.document.querySelectorAll("link[rel='alternate']");
+  public setAlternates(alts: PageSeoAlternateConfig[] | null): void {
+    const head: HTMLHeadElement = this.document.getElementsByTagName('head')[0];
+    var elements: NodeListOf<Element> = this.document.querySelectorAll(
+      "link[rel='alternate']",
+    );
 
     //Remove all the alternate
     if (elements !== null) {
@@ -111,7 +107,8 @@ export class SeoTagsService {
 
     if (alts !== null) {
       for (const alt of alts) {
-        const newAlternate = this.document.createElement('link');
+        const newAlternate: HTMLLinkElement =
+          this.document.createElement('link');
         head.appendChild(newAlternate);
 
         newAlternate.setAttribute('rel', 'alternate');
@@ -121,14 +118,14 @@ export class SeoTagsService {
     }
   }
 
-  public setMetaTag(tag: string, value: string) {
+  public setMetaTag(tag: string, value: string): void {
     if (this.metaService.getTag(`name='${tag}'`) != null) {
       this.metaService.removeTag(`name='${tag}'`);
     }
     this.metaService.updateTag({ name: tag, content: value });
   }
 
-  public generateTags(config: PageSeoConfig, patchMode: boolean = false) {
+  public generateTags(config: PageSeoConfig, patchMode: boolean = false): void {
     if (!config.tags) {
       config.tags = {
         twitter: true,
@@ -167,8 +164,8 @@ export class SeoTagsService {
     }
   }
 
-  setMetaTags(config: PageSeoConfig, patchMode: boolean = false) {
-    const description = config.description;
+  setMetaTags(config: PageSeoConfig, patchMode: boolean = false): void {
+    const description: string | undefined = config.description;
 
     if (description) {
       this.setMetaTag('description', description);
@@ -182,14 +179,19 @@ export class SeoTagsService {
     }
   }
 
-  public deleteMetaTag(tag: string) {
-    const element = this.metaService.getTag(`name='${tag}'`);
+  public deleteMetaTag(tag: string): void {
+    const element: HTMLMetaElement | null = this.metaService.getTag(
+      `name='${tag}'`,
+    );
     if (element != null) {
       this.metaService.removeTagElement(element);
     }
   }
 
-  public setTwitterCard(config: PageSeoConfig, patchMode: boolean = false) {
+  public setTwitterCard(
+    config: PageSeoConfig,
+    patchMode: boolean = false,
+  ): void {
     this.setMetaTag('twitter:card', 'summary');
     if (config.title) {
       this.setMetaTag('twitter:title', config.title);
@@ -214,33 +216,33 @@ export class SeoTagsService {
     }
   }
 
-  public resetTags() {
+  public resetTags(): void {
     this.resetOpenGraph();
     this.resetTwitterCard();
     this.resetMetaTags();
     this.resetCanonical();
   }
 
-  public resetOpenGraph() {
+  public resetOpenGraph(): void {
     this.deleteMetaTag('og:title');
     this.deleteMetaTag('og:description');
     this.deleteMetaTag('og:image');
     this.deleteMetaTag('og:url');
   }
 
-  public resetTwitterCard() {
+  public resetTwitterCard(): void {
     this.deleteMetaTag('twitter:card');
     this.deleteMetaTag('twitter:title');
     this.deleteMetaTag('twitter:description');
     this.deleteMetaTag('twitter:image');
   }
 
-  public resetMetaTags() {
+  public resetMetaTags(): void {
     this.deleteMetaTag('description');
     this.deleteMetaTag('keywords');
   }
 
-  public resetCanonical() {
+  public resetCanonical(): void {
     this.setCanonical(null);
   }
 }
