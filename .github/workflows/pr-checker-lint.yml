@@ -33,16 +33,17 @@ jobs:
 
       - name: Add Code Format Fail Comment
         if: always() && steps.codeFormatNest.outcome == 'failure'
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
-          comment_tag: code-format
+          comment-tag: code-format
+          mode: recreate
           message: |
             Thanks for your contribution ! But your PR does not seem to fit our code format standards. Please run the `npm run format` command and commit the changes.
 
       - name: Remove Code Format Fail Comment
         if: always() && steps.codeFormatNest.outcome == 'success'
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
-          comment_tag: code-format
+          comment-tag: code-format
           mode: delete
-          message: ' '
+          message: ""

@@ -34,16 +34,17 @@ jobs:
 
       - name: Add Test Fail Comment
         if: always() && steps.tests.outcome == 'failure'
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
-          comment_tag: tests
+          comment-tag: tests
+          mode: recreate
           message: |
             Some tests are failing. Please fix them before merging.
 
       - name: Remove Test Fail Comment
         if: always() && steps.tests.outcome == 'success'
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
-          comment_tag: tests
+          comment-tag: tests
           mode: delete
-          message: ' '
+          message: ""
