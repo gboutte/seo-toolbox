@@ -45,3 +45,4 @@ jobs:
         with:
           comment_tag: code-format
           mode: delete
+          message: ' '

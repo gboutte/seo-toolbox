@@ -46,3 +46,4 @@ jobs:
         with:
           comment_tag: tests
           mode: delete
+          message: ' '
