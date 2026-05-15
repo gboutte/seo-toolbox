@@ -32,6 +32,10 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Run Tests
+        run: npx ng test seo-toolbox --watch=false --browsers=ChromeHeadless
+        env:
+          CHROME_FLAGS: "--no-sandbox --disable-dev-shm-usage"
 
       # Configure Git
       - name: Git configuration
