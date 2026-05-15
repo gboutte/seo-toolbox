@@ -46,14 +46,14 @@ export class SeoTagsService {
 
   public setOpenGraph(config: PageSeoConfig, patchMode: boolean = false): void {
     if (config.title) {
-      this.setMetaTag('og:title', config.title);
+      this.setMetaProperty('og:title', config.title);
     } else if (!patchMode) {
-      this.deleteMetaTag('og:title');
+      this.deleteMetaProperty('og:title');
     }
     if (config.description) {
-      this.setMetaTag('og:description', config.description);
+      this.setMetaProperty('og:description', config.description);
     } else if (!patchMode) {
-      this.deleteMetaTag('og:description');
+      this.deleteMetaProperty('og:description');
     }
     if (config.image) {
       let urlImage: string;
@@ -62,14 +62,14 @@ export class SeoTagsService {
       } else {
         urlImage = `${this.domain}${config.image}`;
       }
-      this.setMetaTag('og:image', urlImage);
+      this.setMetaProperty('og:image', urlImage);
     } else if (!patchMode) {
-      this.deleteMetaTag('og:image');
+      this.deleteMetaProperty('og:image');
     }
     if (config.slug) {
-      this.setMetaTag('og:url', `${this.domain}${config.slug}`);
+      this.setMetaProperty('og:url', `${this.domain}${config.slug}`);
     } else if (!patchMode) {
-      this.deleteMetaTag('og:url');
+      this.deleteMetaProperty('og:url');
     }
   }
 
@@ -125,6 +125,20 @@ export class SeoTagsService {
     this.metaService.updateTag({ name: tag, content: value });
   }
 
+  private setMetaProperty(property: string, value: string): void {
+    if (this.metaService.getTag(`property='${property}'`) != null) {
+      this.metaService.removeTag(`property='${property}'`);
+    }
+    this.metaService.updateTag({ property, content: value });
+  }
+
+  private deleteMetaProperty(property: string): void {
+    const element = this.metaService.getTag(`property='${property}'`);
+    if (element != null) {
+      this.metaService.removeTagElement(element);
+    }
+  }
+
   public generateTags(config: PageSeoConfig, patchMode: boolean = false): void {
     if (!config.tags) {
       config.tags = {
@@ -150,7 +164,7 @@ export class SeoTagsService {
     }
 
     if (config.tags.openGraph !== false) {
-      this.setOpenGraph(config);
+      this.setOpenGraph(config, patchMode);
     }
     if (config.tags.canonical !== false && config.slug !== undefined) {
       this.setCanonical(config.slug);
@@ -224,10 +238,10 @@ export class SeoTagsService {
   }
 
   public resetOpenGraph(): void {
-    this.deleteMetaTag('og:title');
-    this.deleteMetaTag('og:description');
-    this.deleteMetaTag('og:image');
-    this.deleteMetaTag('og:url');
+    this.deleteMetaProperty('og:title');
+    this.deleteMetaProperty('og:description');
+    this.deleteMetaProperty('og:image');
+    this.deleteMetaProperty('og:url');
   }
 
   public resetTwitterCard(): void {
