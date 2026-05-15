@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## 0.7.1 - 2026-05-15
+
 ## 0.7.0 - 2025-12-27
 ### Added
 - Add angular 20 and 21 to supported versions
